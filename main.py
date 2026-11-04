@@ -1,5 +1,12 @@
 import asyncio
 import time
+import logging
+from fastapi import FastAPI
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+app = FastAPI()
 
 
 async def fetch_source_async(number: int, delay: float) -> str:
@@ -12,9 +19,10 @@ def fetch_source_sync(number: int, delay: float) -> str:
     return f"{number} completed in {delay} seconds"
 
 
-async def main():
+@app.get("/check")
+async def check_performance():
+    logger.info("Start checking")
     start_time = time.perf_counter()
-    print("Start checking")
 
     results = await asyncio.gather(
         fetch_source_async(1, 3.0),
@@ -28,12 +36,14 @@ async def main():
     end_time = time.perf_counter()
     total_time = end_time - start_time
 
-    print("\nResults")
-    for r in results:
-        print(r)
-
-    print(f"the program's execution time was: {total_time}")
+    return {
+        "status": "success",
+        "execution_time_seconds": total_time,
+        "results": results,
+    }
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import uvicorn
+
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
