@@ -7,9 +7,10 @@ async def fetch_source_async(number: int, delay: float) -> str:
     return f"{number} completed in {delay} seconds"
 
 
-def fetch_source_sync(number: int, delay: float) -> str:
+def fetch_source_sync(id: int, delay: float) -> str:
     time.sleep(delay)
-    return f"{number} completed in {delay} seconds"
+    return f"{id} completed in {delay} seconds"
+
 
 async def get_aggregated_sources() -> tuple[list[str], float]:
     start_time = time.perf_counter()
