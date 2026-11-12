@@ -1,7 +1,6 @@
 import asyncio
 import time
 from typing import Any
-
 from app.api.v1.endpoints.sources import source_to_mode
 
 
@@ -28,7 +27,7 @@ async def get_aggregated_sources() -> tuple[list[str], float]:
     tasks = [
         create_source_task(source, param) for source, param in source_to_mode.items()
     ]
-    results = await asyncio.gather(*tasks)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
 
     total_time = round(time.perf_counter() - start_time, 3)
     return results, total_time
