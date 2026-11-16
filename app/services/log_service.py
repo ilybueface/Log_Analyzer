@@ -33,10 +33,12 @@ async def get_aggregated_sources() -> tuple[list[str], float]:
     return results, total_time
 
 
-async def get_single_sources(source_id: int) -> tuple[list[str], float]:
+async def get_single_sources(source_id: int) -> tuple[str | Exception, float]:
     start_time = time.perf_counter()
     param = source_to_mode[source_id]
-    task = create_source_task(source_id, param)
-    results = await task
+    try:
+        result = await create_source_task(source_id, param)
+    except Exception as err:
+        result = err
     total_time = round(time.perf_counter() - start_time, 3)
-    return [results], total_time
+    return result, total_time

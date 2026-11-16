@@ -1,8 +1,12 @@
 import logging
-from enum import Enum
 from fastapi import HTTPException, APIRouter
 from app.api.v1.endpoints.sources import source_to_mode
-from app.schemas.log_schema import PerformanceCheckResponse
+from app.schemas.log_schema import (
+    PerformanceCheckResponse,
+    PerformanceCheckSingleResponse,
+    CheckStatus,
+    SingleStatusCheck,
+)
 from app.services.log_service import get_single_sources, get_aggregated_sources
 
 logging.basicConfig(level=logging.INFO)
@@ -11,25 +15,27 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-class CheckStatus(str, Enum):
-    ALL_SUCCESS = "all_success"
-    PARTIAL_SUCCESS = "partial_success"
-    ALL_FAILED = "all_failed"
-
-
-@router.get("/check/{id}", response_model=PerformanceCheckResponse)
+@router.get("/check/{id}", response_model=PerformanceCheckSingleResponse)
 async def check_single_performance(id: int):
     if id not in source_to_mode:
         raise HTTPException(status_code=404, detail="Not it found")
     logger.info("Start checking")
 
     results, total_time = await get_single_sources(id)
+    if isinstance(results, Exception):
+        status = SingleStatusCheck.FAILED
+        formatted_result = f"error while polling the source: {results}"
+    else:
+        status = SingleStatusCheck.SUCCESS
+        formatted_result = str(results)
 
-    logger.info(f"Finished checking source {id} in {total_time}s")
+    logger.info(
+        f"Finished checking source {id} in {total_time}s with status {status.value}"
+    )
     return {
-        "status": "success",
+        "status": status.value,
         "execution_time_seconds": total_time,
-        "results": results,
+        "results": [formatted_result],
     }
 
 
