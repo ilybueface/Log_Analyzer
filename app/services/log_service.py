@@ -2,6 +2,7 @@ import asyncio
 import time
 from typing import Any
 from app.api.v1.endpoints.sources import source_to_mode
+from app.core.exceptions import SourceNumberNotFoundError
 
 
 async def fetch_source_async(number: int, delay: float) -> str:
@@ -14,14 +15,14 @@ def fetch_source_sync(id: int, delay: float) -> str:
     return f"{id} completed in {delay} seconds"
 
 
-def create_source_task(source_id: int, param: dict[str, Any]) -> Any:
+def create_source_task(source_id, param: dict[str, Any]) -> Any:
     delay = param.get("delay_seconds", 0.0)
     if param.get("is_async"):
         return fetch_source_async(source_id, delay)
     return asyncio.to_thread(fetch_source_sync, source_id, delay)
 
 
-async def get_aggregated_sources() -> tuple[list[str], float]:
+async def get_aggregated_sources() -> tuple[list[str | int | BaseException], float]:
     start_time = time.perf_counter()
 
     tasks = [
@@ -34,6 +35,8 @@ async def get_aggregated_sources() -> tuple[list[str], float]:
 
 
 async def get_single_sources(source_id: int) -> tuple[str | Exception, float]:
+    if source_id not in source_to_mode:
+        raise SourceNumberNotFoundError(f"Source {source_id} not found")
     start_time = time.perf_counter()
     param = source_to_mode[source_id]
     try:
