@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 8000
     reload: bool = False
+    timeout: float = 5
 
 
 settings = Settings()

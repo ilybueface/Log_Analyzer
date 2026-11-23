@@ -8,6 +8,7 @@ from app.schemas.log_schema import (
 )
 from app.services.log_service import get_single_sources, get_aggregated_sources
 from app.core.exceptions import SourceNumberNotFoundError
+from app.api.v1.dependencies import SettingsDependency
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,10 +17,10 @@ router = APIRouter(prefix="/performance", tags=["sources"])
 
 
 @router.get("/check/{id}", response_model=PerformanceCheckSingleResponse)
-async def check_single_performance(id: int):
-    logger.info(f"Start checking")
+async def check_single_performance(id: int, settings: SettingsDependency):
+    logger.info("Start checking")
     try:
-        results, total_time = await get_single_sources(id)
+        results, total_time = await get_single_sources(id, settings)
         if isinstance(results, Exception):
             status = SingleStatusCheck.FAILED
             formatted_result = f"error while polling the source: {results}"
