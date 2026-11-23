@@ -12,7 +12,7 @@ from app.core.exceptions import SourceNumberNotFoundError
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix="/performance", tags=["sources"])
 
 
 @router.get("/check/{id}", response_model=PerformanceCheckSingleResponse)
