@@ -17,7 +17,7 @@ router = APIRouter(prefix="/performance", tags=["sources"])
 
 @router.get("/check/{id}", response_model=PerformanceCheckSingleResponse)
 async def check_single_performance(id: int):
-    logger.info("Start checking")
+    logger.info(f"Start checking")
     try:
         results, total_time = await get_single_sources(id)
         if isinstance(results, Exception):
