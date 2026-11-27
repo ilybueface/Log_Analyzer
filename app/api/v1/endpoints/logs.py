@@ -20,7 +20,7 @@ router = APIRouter(prefix="/performance", tags=["sources"])
 async def check_single_performance(id: int, settings: SettingsDependency):
     logger.info("Start checking")
     try:
-        results, total_time = await get_single_sources(id, settings)
+        results, total_time = await get_single_sources(id, settings.timeout)
         if isinstance(results, Exception):
             status = SingleStatusCheck.FAILED
             formatted_result = f"error while polling the source: {results}"
@@ -41,9 +41,9 @@ async def check_single_performance(id: int, settings: SettingsDependency):
 
 
 @router.get("/check", response_model=PerformanceCheckResponse)
-async def check_performance():
+async def check_performance(settings: SettingsDependency):
     logger.info("Start checking all sources")
-    results, total_time = await get_aggregated_sources()
+    results, total_time = await get_aggregated_sources(settings.timeout)
     formatted_results: list[str] = []
     success_count = 0
     for item in results:
